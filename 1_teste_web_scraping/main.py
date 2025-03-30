@@ -6,10 +6,21 @@ def install_requirements():
     try:
         # Executar comando para instalar pacotes do requirements.txt
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
-        stdout=subprocess.DEVNULL)
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
         print("Pacotes instalados com sucesso!")
-    except Exception as e:
-        print(f"Erro ao instalar pacotes: {e}")
+        return True
+    except subprocess.CalledProcessError:
+        try:
+            # Executar comando para instalar pacotes do requirements.txt
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "../requirements.txt"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+            print("Pacotes instalados com sucesso!")
+            return True
+        except subprocess.CalledProcessError:
+            print(f"Erro ao instalar pacotes. Arquivo requirements.txt não foi encontrado")
+            return False
 
 # Instalar pacotes antes de executar o resto do código
 install_requirements()
@@ -22,6 +33,8 @@ def main():
     i = 1
     curr_dir = os.getcwd()
     project_dir = f"{curr_dir}/1_teste_web_scraping/"
+    if not os.path.isdir(project_dir):
+        project_dir=f"{curr_dir}/"
     while i != 3:
         if i == 1:
             url = url_anexo1

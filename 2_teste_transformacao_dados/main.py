@@ -6,10 +6,21 @@ def install_requirements():
     try:
         # Executar comando para instalar pacotes do requirements.txt
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
-        stdout=subprocess.DEVNULL)
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
         print("Pacotes instalados com sucesso!")
-    except Exception as e:
-        print(f"Erro ao instalar pacotes: {e}")
+        return True
+    except subprocess.CalledProcessError:
+        try:
+            # Executar comando para instalar pacotes do requirements.txt
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "../requirements.txt"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+            print("Pacotes instalados com sucesso!")
+            return True
+        except subprocess.CalledProcessError:
+            print(f"Erro ao instalar pacotes. Arquivo requirements.txt não foi encontrado")
+            return False
 
 # Instalar pacotes antes de executar o resto do código
 install_requirements()
@@ -21,9 +32,14 @@ def main():
     file_name = "Anexo_1.pdf"
     save_name = "/tabela_extraida.csv"
     relative_file_path = f"./1_teste_web_scraping/{file_name}"
-    relative_save_path = f"./2_teste_transformacao_dados"
     abs_file_path = os.path.abspath(relative_file_path)
+    relative_save_path = f"./2_teste_transformacao_dados"
     abs_save_path = os.path.abspath(relative_save_path)
+    if not os.path.isdir(abs_file_path):
+        relative_file_path = f"../1_teste_web_scraping/{file_name}"
+        abs_file_path = os.path.abspath(relative_file_path)
+        abs_save_path = os.getcwd()
+    print(f"caminho Absoluto {abs_file_path}")
 
     if os.path.exists(abs_file_path):
         print(f"Arquivo {file_name} encontrado na pasta: {abs_file_path}")
