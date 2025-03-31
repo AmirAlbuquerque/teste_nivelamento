@@ -73,18 +73,18 @@ BEGIN
         END;
     END LOOP;
 
-    RAISE NOTICE 'Conversão do arquivo de , para .';
+    RAISE NOTICE 'Convertendo dados da coluna saldo_inicial e saldo_final...';
     -- Inserir os dados convertidos corretamente na tabela final
     INSERT INTO demo_contabeis (data_oco, registro_ans, conta_contabil, descricao, saldo_inicial, saldo_final)
     SELECT data_oco, registro_ans, conta_contabil, descricao, 
         REPLACE(saldo_inicial, ',', '.')::DECIMAL(15,2), 
         REPLACE(saldo_final, ',', '.')::DECIMAL(15,2)
     FROM temp_demo_contabeis;
-    RAISE NOTICE 'Conversão concluida';
+    RAISE NOTICE 'Conversão concluída';
     -- Remover a tabela temporária ao final
     DROP TABLE temp_demo_contabeis;
-    RAISE NOTICE 'Tabela temp removida';
-    RAISE NOTICE 'Todo o processo foi finalizado';
+    RAISE NOTICE 'Tabela temporária removida';
+    RAISE NOTICE 'Processo de importação concluído com sucesso!';
 END $$;
 
 -- Importar dados para operadoras_ativas
@@ -173,4 +173,8 @@ LIMIT 10;
 
 -- Remover a tabela temporária ao final
 DROP TABLE temp_soma_total_anual;
-COMMIT;
+-- Fim do script. Não adicionar comandos abaixo.
+DO $$ 
+BEGIN
+    RAISE NOTICE 'Script finalizado com sucesso.';
+END $$;
