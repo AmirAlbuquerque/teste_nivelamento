@@ -7,8 +7,8 @@ CREATE TABLE demo_contabeis(
     registro_ans INT,
     conta_contabil INT,
     descricao VARCHAR(255),
-    saldo_inicial TEXT,
-    saldo_final TEXT
+    saldo_inicial DECIMAL(15,2),
+    saldo_final DECIMAL(15,2)
 ); 
 -- Cria a tabela de operadoras ativas
 CREATE TABLE operadoras_ativas(
@@ -72,18 +72,19 @@ BEGIN
             CONTINUE;  -- Continua para o próximo arquivo mesmo com erro
         END;
     END LOOP;
+
+    RAISE NOTICE 'Conversão do arquivo de , para .';
     -- Inserir os dados convertidos corretamente na tabela final
     INSERT INTO demo_contabeis (data_oco, registro_ans, conta_contabil, descricao, saldo_inicial, saldo_final)
     SELECT data_oco, registro_ans, conta_contabil, descricao, 
-           REPLACE(saldo_inicial, ',', '.')::DECIMAL(15,2), 
-           REPLACE(saldo_final, ',', '.')::DECIMAL(15,2)
+        REPLACE(saldo_inicial, ',', '.')::DECIMAL(15,2), 
+        REPLACE(saldo_final, ',', '.')::DECIMAL(15,2)
     FROM temp_demo_contabeis;
-    -- Altera a coluna saldo final e inicial para tipo decimal
-    ALTER TABLE demo_contabeis 
-    ALTER COLUMN saldo_inicial TYPE DECIMAL(15,2) USING saldo_inicial::DECIMAL(15,2),
-    ALTER COLUMN saldo_final TYPE DECIMAL(15,2) USING saldo_final::DECIMAL(15,2);
+    RAISE NOTICE 'Conversão concluida';
     -- Remover a tabela temporária ao final
     DROP TABLE temp_demo_contabeis;
+    RAISE NOTICE 'Tabela temp removida';
+    RAISE NOTICE 'Todo o processo foi finalizado';
 END $$;
 
 -- Importar dados para operadoras_ativas
@@ -122,7 +123,7 @@ INSERT INTO resultado_trimestral
 SELECT
     oa.razao_social,
     stt.registro_ans,
-    (stt.total_saldo_inicial - stt.total_saldo_final) AS despesa,
+    MAX(stt.total_saldo_inicial - stt.total_saldo_final) AS despesa,
     stt.descricao
 FROM temp_soma_total_trimestral stt
 JOIN operadoras_ativas oa ON stt.registro_ans = oa.registro_ans
@@ -162,7 +163,7 @@ INSERT INTO resultado_anual
 SELECT
     oa.razao_social,
     sta.registro_ans,
-    (sta.total_saldo_inicial - sta.total_saldo_final) AS despesa,
+    MAX(sta.total_saldo_inicial - sta.total_saldo_final) AS despesa,
     sta.descricao
 FROM temp_soma_total_anual sta
 JOIN operadoras_ativas oa ON sta.registro_ans = oa.registro_ans
@@ -172,3 +173,4 @@ LIMIT 10;
 
 -- Remover a tabela temporária ao final
 DROP TABLE temp_soma_total_anual;
+COMMIT;
