@@ -80,7 +80,10 @@ BEGIN
         REPLACE(saldo_inicial, ',', '.')::DECIMAL(15,2), 
         REPLACE(saldo_final, ',', '.')::DECIMAL(15,2)
     FROM temp_demo_contabeis;
-    RAISE NOTICE 'Conversão concluída';
+    -- Altera a coluna saldo final e inicial para tipo decimal
+    ALTER TABLE demo_contabeis 
+    ALTER COLUMN saldo_inicial TYPE DECIMAL(15,2) USING saldo_inicial::DECIMAL(15,2),
+    ALTER COLUMN saldo_final TYPE DECIMAL(15,2) USING saldo_final::DECIMAL(15,2);
     -- Remover a tabela temporária ao final
     DROP TABLE temp_demo_contabeis;
     RAISE NOTICE 'Tabela temporária removida';
